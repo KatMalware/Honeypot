@@ -1,0 +1,4 @@
+# Python version
+python>=3.8
+
+# No third-party modules required
