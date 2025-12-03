@@ -1,5 +1,6 @@
 import logging
 
+WELCOME = b"220 Welcome to Fake FTP Server\r\n"
 ASK_USER = b"USER: "
 ASK_PASS = b"PASS: "
 DENIED = b"530 Login incorrect\r\n"
@@ -9,21 +10,28 @@ async def handle_connection(reader, writer):
     logging.info(f"[FTP] Connection from {addr}")
 
     try:
-        # Ask username
+        writer.write(WELCOME)
+        await writer.drain()
+
         writer.write(ASK_USER)
         await writer.drain()
         username = await reader.readline()
 
-        # Ask password
         writer.write(ASK_PASS)
         await writer.drain()
         password = await reader.readline()
 
-        logging.info(f"[FTP] Username: {username.decode(errors='ignore').strip()}, Password: {password.decode(errors='>
+        logging.info(f"[FTP] Username: {username.decode(errors='ignore').strip()}, Password: {password.decode(errors='ignore').strip()}")
 
-        # Deny login
         writer.write(DENIED)
         await writer.drain()
 
     except Exception as e:
         logging.error(f"[FTP] Error: {e}")
+
+    finally:
+        try:
+            writer.close()
+            await writer.wait_closed()
+        except:
+            pass
